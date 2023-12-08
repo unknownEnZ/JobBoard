@@ -1,0 +1,26 @@
+﻿@page "/searchJobs"
+
+<h3>SearchJobs</h3>
+
+<form action="/search" method="GET">
+    <label for="jobTitle">Job Title:</label>
+    <input type="text" id="jobTitle" name="title" placeholder="Enter job title">
+
+    <label for="location">Location:</label>
+    <input type="text" id="location" name="location" placeholder="Enter location">
+
+    <label for="category">Category:</label>
+    <select id="category" name="category">
+        <option value="">Select category</option>
+        <option value="IT">Information Technology</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Finance">Finance</option>
+        <!-- Add more categories as needed -->
+    </select>
+
+    <button type="submit">Search</button>
+</form>
+
+@code {
+
+}

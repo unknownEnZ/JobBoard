@@ -1,0 +1,20 @@
+﻿@page "/seekCareerAdvice"
+
+<h3>SeekCareerAdvice</h3>
+
+<form action="/submit_advice_request" method="POST">
+    <label for="name">Your Name:</label>
+    <input type="text" id="name" name="name" placeholder="Enter your name" required>
+
+    <label for="email">Your Email:</label>
+    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+    <label for="message">Your Message:</label>
+    <textarea id="message" name="message" placeholder="Enter your career-related questions or concerns" rows="4" required></textarea>
+
+    <button type="submit">Submit Request</button>
+</form>
+
+@code {
+
+}
