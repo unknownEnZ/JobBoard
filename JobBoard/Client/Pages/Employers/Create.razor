@@ -1,0 +1,106 @@
+﻿@page "/employers/create"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+
+<h3 class="card-title">Create New Employers</h3>
+<hr />
+<br />
+@* 
+<EditForm Model="@employer" OnValidSubmit="CreateEmployer">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+   
+
+    <div class="form-group">
+        <label>First Name: </label>
+        <div>
+            <InputText @bind-Value="employer.FirstName" class="form-control" />
+            <ValidationMessage For="@(() => employer.FirstName)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Last Name: </label>
+        <div>
+            <InputText @bind-Value="employer.LastName" class="form-control" />
+            <ValidationMessage For="@(() => employer.LastName)" />
+        </div>
+    </div>
+    <br />
+
+    <div class="form-group">
+        <label>Phone Number: </label>
+        <div>
+            <InputText @bind-Value="employer.PhoneNumber" class="form-control" />
+            <ValidationMessage For="@(() => employer.PhoneNumber)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Email Address: </label>
+        <div>
+            <InputText @bind-Value="employer.EmailAddress" class="form-control" />
+            <ValidationMessage For="@(() => employer.EmailAddress)" />
+        </div>
+    </div>
+
+    <br />
+    <div class="form-group">
+        <label>Company: </label>
+        <div>
+            <InputSelect @bind-Value="employer.CompanyId" class="form-control">
+                <option value="">-- Select Company --</option>
+                @if (Companies != null)
+                {
+                    foreach (var company in Companies)
+                    {
+                        <option value="@company.Id">@company.CompanyName</option>
+                    }
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => employer.CompanyId)" />
+        </div>
+    </div>
+    
+    <br />
+
+    <button type="submit" class="btn btn-success btn-block"> Create Employer</button>
+    <br />
+    <BackToList Target="employers" />
+</EditForm>  *@
+
+<FormComponent ButtonText="Create Employer" employer="employer" OnValidSubmit="@CreateEmployer" />
+
+
+
+
+
+@code {
+    Employer employer = new Employer();
+
+    private IList<Company>? Companies;
+    // private IList<Model>? Models;
+    // private IList<Colour>? Colours;
+
+
+
+    protected async override Task OnInitializedAsync() // whenever the page loads all the data will be loaded
+    {
+         Companies = await _client.GetFromJsonAsync<List<Company>>($"{Endpoints.CompaniesEndpoint}");
+
+
+
+    }
+
+    private async Task CreateEmployer()
+    {
+        await _client.PostAsJsonAsync(Endpoints.EmployersEndpoint, employer);
+        _navManager.NavigateTo("/employers/");
+
+    }
+
+
+
+}

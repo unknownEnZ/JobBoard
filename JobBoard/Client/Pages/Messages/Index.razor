@@ -1,0 +1,92 @@
+﻿
+@page "/messages/"
+@inject HttpClient _client
+@inject IJSRuntime js
+@inject HttpInterceptorService _interceptor
+@implements IDisposable
+@inject NavigationManager _navManager
+@attribute [Authorize]
+
+<a href="/messages/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Create New Message
+</a>
+ 
+<br />
+<br/>
+  
+            @if (Messages == null)
+            {
+                <div class="alert alert-info">Loading Messages...</div>
+            }
+            else
+            {
+                <Style />
+                @foreach (var message in Messages)
+                {
+                    <div class="message-item">
+            <div class="Receiver">Receiver: @message.JobSeeker.FirstName @message.JobSeeker.LastName</div>
+            <div class="content">Message: @message.Content</div>
+                        <div class="sender">Sender: @message.Employer.FirstName @message.Employer.LastName</div>
+                        
+                        
+
+                        <!-- Button container placed at the top right -->
+                        <div class="message-buttons">
+                <a href="/messages/view/@message.Id" class="btn btn-primary">
+                    <span class="oi oi-book"></span>
+                </a>
+                            <button class="btn btn-danger" @onclick="@(()=>Delete(message.Id))">
+                                <span class="oi oi-delete"></span>
+                            </button>
+                        </div>
+
+                        <!-- Time placed at the bottom right -->
+                        <div class="time">@message.DateCreated.ToString("g")</div>
+                    </div>
+                }
+                
+            }
+                
+    
+        
+
+
+
+@code {
+    private IList<Message>? Messages;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        Messages = await _client.GetFromJsonAsync<List<Message>>($"{Endpoints.MessagesEndpoint}");
+    }
+
+ 
+
+  
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        await js.InvokeVoidAsync("AddDataTable", "#messagesTable");
+    }
+    async Task Delete(int messageid)
+    {
+        if (Messages != null)
+        {
+            var message = Messages.First(q => q.Id == messageid);
+            var confirm = await js.InvokeAsync<bool>("confirm", $"Do you want to delete {message.Employer}?");
+            if (confirm)
+            {
+                await _client.DeleteAsync($"{Endpoints.MessagesEndpoint}/{messageid}");
+                await OnInitializedAsync();
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        _interceptor.DisposeEvent();
+        js.InvokeVoidAsync("DataTablesDispose", "#messagesTable");
+    }
+}

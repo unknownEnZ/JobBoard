@@ -1,0 +1,96 @@
+﻿@inject HttpClient _client
+
+<EditForm Model="@application" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <fieldset disabled="@Disabled">
+    <div class="form-group">
+        <label>Resume: </label>
+        <div>
+            <InputTextArea @bind-Value="application.Resume" class="form-control" />
+            <ValidationMessage For="@(() => application.Resume)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Status: </label>
+        <div>
+            <InputText @bind-Value="application.Status" class="form-control" />
+            <ValidationMessage For="@(() => application.Status)" />
+        </div>
+    </div>
+  
+
+    <div class="form-group">
+        <label>Job: </label>
+        <div>
+            <InputSelect @bind-Value="application.JobId" class="form-control">
+                <option value="">-- Select Job --</option>
+                @if (Jobs != null)
+                {
+                    foreach (var job in Jobs)
+                    {
+                        <option value="@job.Id">@job.JobTitle</option>
+                    }
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => application.JobId)" />
+        </div>
+    </div>
+    <br />
+        <div class="form-group">
+            <label>Job Seeker: </label>
+            <div>
+                <InputSelect @bind-Value="application.JobSeekerId" class="form-control">
+                    <option value="">-- Select JobSeeker --</option>
+                    @if (JobSeekers != null)
+                    {
+                        foreach (var jobSeeker in JobSeekers)
+                        {
+                            <option value="@jobSeeker.Id">@jobSeeker.FirstName - @jobSeeker.LastName</option>
+                        }
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => application.JobSeekerId)" />
+            </div>
+        </div>
+
+
+
+
+  @*   <br />
+
+    <button type="submit" class="btn btn-success btn-block">Update Application</button>
+    <br /> *@
+   
+    </fieldset>
+    @if (!Disabled)
+    {
+
+
+        <button type="submit" class="btn btn-success btn-block"> @ButtonText </button>
+    }
+
+    <BackToList Target="applications" />
+</EditForm>
+
+@code {
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public Application? application { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+
+    private IList<Job>? Jobs;
+    private IList<JobSeeker> JobSeekers;
+
+
+
+
+    protected async override Task OnInitializedAsync() // whenever the page loads all the data will be loaded
+    {
+        Jobs = await _client.GetFromJsonAsync<List<Job>>($"{Endpoints.JobsEndpoint}");
+        JobSeekers = await _client.GetFromJsonAsync<List<JobSeeker>>($"{Endpoints.JobSeekersEndpoint}");
+
+
+    }
+}

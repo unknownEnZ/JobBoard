@@ -1,0 +1,14 @@
+﻿@page "/applications/view/{id:int}"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+<h3>View</h3>
+<FormComponent application="application" Disabled="true" />
+@code {
+    [Parameter] public int id { get; set; }
+    Application? application = new Application();
+    protected async override Task OnParametersSetAsync()
+    {
+        application = await
+        _client.GetFromJsonAsync<Application>($"{Endpoints.ApplicationsEndpoint}/{id}");
+    }
+}

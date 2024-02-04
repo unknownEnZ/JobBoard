@@ -1,0 +1,30 @@
+﻿@page "/messages/create/"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+<h3 class="card-title"> New messages</h3>
+<br />
+
+<FormComponent ButtonText="Create Message" message="message" OnValidSubmit="@CreateMessage" />
+@code {
+    Message message = new Message();
+
+    private IList<Message>? Messages;
+    private IList<Employer>? Employers;
+    private IList<JobSeeker>? JobSeekers;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Messages = await _client.GetFromJsonAsync<List<Message>>($"{Endpoints.MessagesEndpoint}");
+        Employers = await _client.GetFromJsonAsync<List<Employer>>($"{Endpoints.EmployersEndpoint}");
+        JobSeekers = await _client.GetFromJsonAsync<List<JobSeeker>>($"{Endpoints.JobSeekersEndpoint}");
+    }
+
+    private async Task CreateMessage()
+    {
+        await _client.PostAsJsonAsync(Endpoints.MessagesEndpoint, message);
+        _navManager.NavigateTo("/messages/");
+    }
+}
+
+
+

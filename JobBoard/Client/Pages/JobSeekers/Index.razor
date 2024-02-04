@@ -1,0 +1,111 @@
+﻿@page "/jobSeekers/"
+@inject HttpClient _client
+@inject IJSRuntime js
+@attribute [Authorize]
+@inject HttpInterceptorService _interceptor
+@implements IDisposable
+<h3 class="card-title">JobSeekers </h3>
+<br />
+
+
+<a href="/jobSeekers/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Create New JobSeeker
+</a>
+<br />
+<br />
+
+
+@if (JobSeekers == null)
+{
+    <div class="alert alert-info">Loading JobSeekers...</div>
+}
+else
+{
+    <table class="table table-responsive" id="jobSeekerTable">
+        <!-- <thead>
+             <tr>
+                 <th>Name</th>
+                 <th>Actions</th>
+             </tr>
+         </thead> -->
+
+        <thead>
+            <tr>
+                
+                <td>JobSeeker Name</td>
+
+                <td>ContactNumber</td>
+
+                <td>EmailAddress</td>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var jobSeeker in JobSeekers)
+            {
+                <tr>
+                    
+                    <td>@jobSeeker.FirstName  @jobSeeker.LastName</td>
+                    <td>@jobSeeker.PhoneNumber</td>
+                    <td>@jobSeeker.EmailAddress</td>
+                    <td>
+                        <a href="/jobSeekers/view/@jobSeeker.Id" class="btn btn-primary">
+                            <span class="oi oi-book"></span>
+                        </a>
+
+                        <a href="/jobSeekers/edit/@jobSeeker.Id" class="btn btn-warning">
+                            <span class="oi oi-pencil"></span>
+                        </a>
+
+                        <button class="btn btn-danger" @onclick="@(()=>Delete(jobSeeker.Id))">
+                            <span class="oi oi-delete"></span>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+
+
+}
+
+@code {
+    private List<JobSeeker>? JobSeekers;
+
+    protected async override Task OnInitializedAsync()
+    {
+        _interceptor.MonitorEvent();
+        JobSeekers = await _client.GetFromJsonAsync<List<JobSeeker>>($"{Endpoints.JobSeekersEndpoint}");
+    }
+
+    async Task Delete(int jobSeekerId)
+    {
+        if (JobSeekers != null)
+        {
+            var jobSeeker = JobSeekers.First(q => q.Id == jobSeekerId);
+            var confirm = await js.InvokeAsync<bool>("confirm", $"Do you want to delete {jobSeeker.Id}?");
+            if (confirm)
+            {
+                await _client.DeleteAsync($"{Endpoints.JobSeekersEndpoint}/{jobSeekerId}");
+
+                await OnInitializedAsync();
+            }
+        }
+    }
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        await js.InvokeVoidAsync("AddDataTable", "#jobSeekerTable");
+    }
+    public void Dispose()
+    {
+        _interceptor.MonitorEvent();
+        js.InvokeVoidAsync("DataTablesDispose", "#jobSeekerTable");
+
+    }
+
+
+}

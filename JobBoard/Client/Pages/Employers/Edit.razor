@@ -1,0 +1,25 @@
+﻿@page "/employers/edit/{id:int}"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3>Edit</h3>
+<FormComponent ButtonText="Update" OnValidSubmit="EditEmployer" employer="employer" />
+@code {
+
+    [Parameter] public int id { get; set; }
+    Employer? employer = new Employer();
+    protected async override Task OnParametersSetAsync()
+    {
+        employer = await _client.GetFromJsonAsync<Employer>($"{Endpoints.EmployersEndpoint}/{id}");
+    }
+    async Task EditEmployer()
+    {
+        await _client.PutAsJsonAsync($"{Endpoints.EmployersEndpoint}/{id}", employer);
+        _navManager.NavigateTo("/employers/");
+    }
+
+
+
+
+
+}

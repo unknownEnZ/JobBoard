@@ -1,0 +1,109 @@
+﻿@page "/companies/"
+@inject HttpClient _client
+@inject IJSRuntime js
+@attribute [Authorize]
+
+@inject HttpInterceptorService _interceptor
+@implements IDisposable
+
+<h3 class="card-title">Companies </h3>
+<br />
+
+
+<a href="/Companies/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Create New Company
+</a>
+<br />
+<br />
+
+
+@if (Companies == null)
+{
+    <div class="alert alert-info">Loading Companies...</div>
+}
+else
+{
+    <table class="table table-responsive" id="companiesTable">
+        <!-- <thead>
+             <tr>
+                 <th>Name</th>
+                 <th>Actions</th>
+             </tr>
+         </thead> -->
+
+        <thead>
+            <tr>
+                <th>Company Name</th>
+                <th>Industry</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var Company in Companies)
+            {
+                <tr>
+                    <td>@Company.CompanyName</td>
+                    <td>@Company.Industry</td>
+                    <td>
+                        <a href="/Companies/view/@Company.Id" class="btn btn-primary">
+                            <span class="oi oi-book"></span>
+                        </a>
+
+                        <a href="/Companies/edit/@Company.Id" class="btn btn-warning">
+                            <span class="oi oi-pencil"></span>
+                        </a>
+
+                        <button class="btn btn-danger" @onclick="@(()=>Delete(Company.Id))">
+                            <span class="oi oi-delete"></span>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+
+
+
+}
+
+@code {
+    private List<Company>? Companies;
+
+    protected async override Task OnInitializedAsync()
+    {
+        _interceptor.MonitorEvent();
+        Companies = await _client.GetFromJsonAsync<List<Company>>($"{Endpoints.CompaniesEndpoint}");
+    }
+
+    async Task Delete(int CompanyId)
+    {
+        if (Companies != null)
+        {
+            var Company = Companies.First(q => q.Id == CompanyId);
+            var confirm = await js.InvokeAsync<bool>("confirm", $"Do you want to delete {Company.CompanyName}?");
+            if (confirm)
+            {
+                await _client.DeleteAsync($"{Endpoints.CompaniesEndpoint}/{CompanyId}");
+
+                await OnInitializedAsync();
+            }
+        }
+    }
+   
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        await js.InvokeVoidAsync("AddDataTable", "#companiesTable");
+    }
+    public void Dispose()
+    {
+        _interceptor.MonitorEvent();
+        js.InvokeVoidAsync("DataTablesDispose", "#companiesTable");
+       
+    }
+  
+
+}

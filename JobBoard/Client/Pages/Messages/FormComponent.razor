@@ -1,0 +1,81 @@
+﻿@inject HttpClient _client
+
+<EditForm Model="@message" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <fieldset disabled="@Disabled">
+       
+
+        <div class="form-group col">
+            <label>Content:</label>
+            <div>
+                <textarea @bind="@message.Content" class="form-control" rows="10" cols="50"></textarea>
+                <ValidationMessage For="@(() => message.Content)" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <div class="row">
+
+
+                    <div class="col-md-6">
+                        <label>Sender:</label>
+                        <InputSelect @bind-Value="@message.EmployerId" class="form-control">
+                            <option value="">-- Select Employer --</option>
+                            @if (Employers != null)
+                            {
+                                foreach (var employer in Employers)
+                                {
+                                    <option value="@employer.Id">@employer.FirstName @employer.LastName</option>
+                                }
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() =>message.EmployerId)" />
+                    </div>
+                    <div class="col-md-6">
+                        <label>Receiver:</label>
+                        <InputSelect @bind-Value="@message.JobSeekerId" class="form-control">
+                            <option value="">-- Select JobSeeker --</option>
+                            @if (JobSeekers != null)
+                            {
+                                foreach (var jobSeeker in JobSeekers)
+                                {
+                                    <option value="@jobSeeker.Id">@jobSeeker.FirstName @jobSeeker.LastName</option>
+                                }
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() =>message.JobSeekerId)" />
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+       
+    </fieldset>
+    @if (!Disabled)
+    {
+        <button type="submit" class="btn btn-success btn-block">
+            Send
+        </button>
+    }
+    <BackToList Target="messages" />
+</EditForm>
+
+@code {
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public Message? message { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    private IList<Message>? Messages;
+    private IList<Employer>? Employers;
+    private IList<JobSeeker>? JobSeekers;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Messages = await _client.GetFromJsonAsync<List<Message>>($"{Endpoints.MessagesEndpoint}");
+        Employers = await _client.GetFromJsonAsync<List<Employer>>($"{Endpoints.EmployersEndpoint}");
+        JobSeekers = await _client.GetFromJsonAsync<List<JobSeeker>>($"{Endpoints.JobSeekersEndpoint}");
+    }
+}

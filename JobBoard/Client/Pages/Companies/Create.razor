@@ -1,0 +1,68 @@
+﻿@page "/companies/create"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+
+<h3 class="card-title">Create New Companies</h3>
+<hr />
+<br />
+
+
+@* <EditForm Model="@company" OnValidSubmit="CreateCompany">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+
+
+    <div class="form-group">
+        <label>Company Name: </label>
+        <div>
+            <InputText @bind-Value="company.CompanyName" class="form-control" />
+            <ValidationMessage For="@(() => company.CompanyName)" />
+        </div>
+
+
+    </div>
+    <br />
+    <div class="form-group">
+        <label>Industry: </label>
+        <div>
+            <InputText @bind-Value="company.Industry" class="form-control" />
+            <ValidationMessage For="@(() => company.Industry)" />
+        </div>
+
+
+    </div>
+    <br />
+
+    <button type="submit" class="btn btn-success btn-block"> Create Company</button>
+    <br />
+    <BackToList Target="companies" />
+</EditForm>  *@
+
+
+<FormComponent ButtonText="Create Company" company="company" OnValidSubmit="@CreateCompany" />
+
+@code {
+    Company company = new Company();
+
+    
+   
+
+
+    protected async override Task OnInitializedAsync() // whenever the page loads all the data will be loaded
+    {
+
+
+    }
+
+    private async Task CreateCompany()
+    {
+        await _client.PostAsJsonAsync(Endpoints.CompaniesEndpoint, company);
+        _navManager.NavigateTo("/companies/");
+
+    }
+
+
+
+}
